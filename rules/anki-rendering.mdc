@@ -1,0 +1,223 @@
+---
+description: Anki HTML/CSS 渲染规则 - 基于官方源码分析
+globs: ["src/lib/components/PreviewPane.svelte", "src/lib/anki-styles.ts"]
+---
+
+# Anki 渲染系统规则
+
+## HTML 文档结构
+
+生成的 HTML 必须严格遵循以下模板：
+
+```html
+<!doctype html>
+<html class="{night-mode或空}" dir="ltr" data-bs-theme="{dark或light}">
+<head>
+    <title>Anki Preview</title>
+    <style>{standard_css}</style>
+    <style>{user_css}</style>
+</head>
+<body class="card {night-mode} {mobile} {isMac}">
+    {content}
+</body>
+</html>
+```
+
+### 关键属性规则
+
+- `<html class>`: 夜间模式时为 `"night-mode"`，否则为空
+- `<html dir>`: 固定为 `"ltr"` (除非支持 RTL)
+- `<html data-bs-theme>`: 夜间为 `"dark"`，日间为 `"light"`
+- `<body class>`: 必须包含 `"card"`，根据状态追加其他类
+
+## CSS 变量系统
+
+### 语义化变量命名
+
+```css
+/* 前景色 */
+--fg              /* 默认文本颜色 */
+--fg-subtle       /* 次要文本 */
+--fg-disabled     /* 禁用状态 */
+--fg-link         /* 链接颜色 */
+
+/* 背景色 */
+--canvas          /* 窗口背景 */
+--canvas-elevated /* 容器背景 */
+--canvas-inset    /* 输入框背景 */
+
+/* 边框 */
+--border          /* 默认边框 */
+--border-subtle   /* 低对比度边框 */
+--border-focus    /* 焦点边框 */
+
+/* 滚动条 */
+--scrollbar-bg
+--scrollbar-bg-hover
+--scrollbar-bg-active
+
+/* 过渡时间 */
+--transition: 180ms
+--transition-medium: 500ms
+
+/* 圆角 */
+--border-radius: 5px
+```
+
+### 主题切换
+
+```css
+:root {
+    --canvas: #f5f5f5;  /* 浅色主题 */
+}
+:root.night-mode {
+    --canvas: #2c2c2c;  /* 深色主题 */
+}
+```
+
+## 核心样式规则
+
+### Box Model (关键!)
+
+```css
+* {
+    box-sizing: content-box;  /* 必须！保持与 Anki 卡片模板兼容 */
+}
+```
+
+### Body 样式
+
+```css
+body {
+    color: var(--fg);
+    background: var(--canvas);
+    margin: 2em;  /* 固定 2em */
+    overscroll-behavior: none;
+    font-size: 15px;  /* 固定 15px */
+    zoom: 1;
+}
+```
+
+### 滚动条样式
+
+```css
+::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+::-webkit-scrollbar-thumb {
+    background-color: var(--scrollbar-bg);
+    border-radius: 3px;  /* 3px 而非 5px */
+    border: 2px solid transparent;
+    background-clip: padding-box;  /* 关键属性 */
+}
+```
+
+## 平台特定样式
+
+### Mac 平台检测
+
+```typescript
+const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+```
+
+### Mac 专用按钮样式
+
+```css
+/* 仅 Mac 平台 */
+button {
+    --canvas: #fff;
+    -webkit-appearance: none;
+    background: var(--canvas);
+    border-radius: var(--border-radius);
+    padding: 3px 12px;
+    border: 1px solid var(--border);
+    box-shadow: 0px 1px 3px var(--border-subtle);
+    font-family: Helvetica;
+}
+.night-mode button {
+    --canvas: #606060;
+    --fg: #eee;
+}
+```
+
+### 非 Mac 平台
+
+```css
+button {
+    font-family: system-ui, -apple-system, sans-serif;
+}
+/* 输入框焦点样式 */
+textarea:focus, input:focus {
+    outline: 0 none;
+    border-color: var(--border-focus);
+}
+```
+
+## 实现要求
+
+在 `PreviewPane.svelte` 中：
+
+1. 使用 iframe 隔离样式
+2. 动态检测平台 (`isMac`)
+3. 正确生成 body class: `['card', 'night-mode', 'mobile', 'isMac'].join(' ')`
+4. 使用 `doc.open()` / `doc.write()` / `doc.close()` 写入 HTML
+5. 传递 `isMac` 参数给 `generateAnkiCss(isMac)`
+
+在 `anki-styles.ts` 中：
+
+1. 接受 `isMac: boolean` 参数
+2. 根据平台返回不同的按钮样式
+3. 确保所有 CSS 变量都有明暗两套值
+4. 使用 `content-box` sizing
+5. Body margin 固定为 `2em`
+6. 滚动条 `border-radius: 3px`
+
+## 常见错误
+
+❌ **错误**:
+```css
+box-sizing: border-box;  /* 会破坏卡片布局 */
+body { margin: 0; }      /* 不符合 Anki 规范 */
+font-size: 16px;         /* 应该是 15px */
+```
+
+✅ **正确**:
+```css
+box-sizing: content-box;
+body { margin: 2em; }
+font-size: 15px;
+```
+
+## 调试检查
+
+验证实现是否正确：
+
+```javascript
+// 浏览器控制台
+const iframe = document.querySelector('iframe');
+const doc = iframe.contentDocument;
+
+// 检查 HTML 属性
+console.log(doc.documentElement.className);  // "night-mode" 或 ""
+console.log(doc.documentElement.dir);        // "ltr"
+console.log(doc.documentElement.dataset.bsTheme);  // "dark" 或 "light"
+
+// 检查 body 类
+console.log(doc.body.className);  // "card night-mode mobile isMac"
+
+// 检查 CSS 变量
+console.log(getComputedStyle(doc.documentElement).getPropertyValue('--canvas'));
+
+// 检查 box-sizing
+console.log(getComputedStyle(doc.body).boxSizing);  // 应该是 "content-box"
+```
+
+## 参考文件
+
+- `anki-reference/webview/webview.py` - `stdHtml()` 和 `standard_css()` 方法
+- `anki-reference/css/webview.scss` - 基础样式定义
+- `anki-reference/sass/_vars.scss` - 语义化变量定义
+- `anki-reference/sass/_color-palette.scss` - 颜色调色板
+
+使用 `pnpm sync-anki` 更新这些参考文件。
