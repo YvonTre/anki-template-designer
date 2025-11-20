@@ -3,13 +3,13 @@ import type { AppState, NoteType, Templates } from '../types';
 const BASIC_TEMPLATES: Templates = {
   front: '{{Front}}',
   back: '{{FrontSide}}\n\n<hr id=answer>\n\n{{Back}}',
-  css: '.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n'
+  css: '.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n\nhr {\n border: none;\n border-top: 1px solid #ccc;\n margin: 1em 0;\n}\n\n.night-mode .card {\n color: #e0e0e0;\n background-color: #2c2c2c;\n}\n\n.night-mode hr {\n border-top-color: #555;\n}\n'
 };
 
 const CLOZE_TEMPLATES: Templates = {
   front: '{{cloze:Text}}',
   back: '{{cloze:Text}}\n\n<br>\n\n{{Extra}}',
-  css: '.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n\n.cloze {\n font-weight: bold;\n color: blue;\n}\n.night .cloze {\n color: lightblue;\n}'
+  css: '.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n\n.cloze {\n font-weight: bold;\n color: blue;\n}\n\n.night-mode .card {\n color: #e0e0e0;\n background-color: #2c2c2c;\n}\n\n.night-mode .cloze {\n color: lightblue;\n}\n'
 };
 
 export const appState = $state<AppState & { 
