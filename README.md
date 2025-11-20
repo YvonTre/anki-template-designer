@@ -1,43 +1,72 @@
-# Svelte + Vite
+# Anki Template Designer
 
-This template should help get you started developing with Svelte in Vite.
+一个用于设计和预览 Anki 卡片模板的在线工具。
 
-## Recommended IDE Setup
+## 功能特性
 
-[VS Code](https://code.visualstudio.com/) + [Svelte](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode).
+- 📝 可视化编辑 Anki 卡片模板（Front、Back、CSS）
+- 👀 实时预览卡片效果
+- 🌙 支持夜间模式预览
+- 📱 支持移动端预览
+- 💾 本地保存模板到 IndexedDB
+- 🔄 自动保存功能
+- 🎨 完整的 Anki CSS 变量系统支持
+- 🔧 兼容 Anki 的渲染规则
 
-## Need an official Svelte framework?
+## 开发
 
-Check out [SvelteKit](https://github.com/sveltejs/kit#readme), which is also powered by Vite. Deploy anywhere with its serverless-first approach and adapt to various platforms, with out of the box support for TypeScript, SCSS, and Less, and easily-added support for mdsvex, GraphQL, PostCSS, Tailwind CSS, and more.
+```bash
+# 安装依赖
+npm install
 
-## Technical considerations
+# 启动开发服务器
+npm run dev
 
-**Why use this over SvelteKit?**
+# 构建生产版本
+npm run build
 
-- It brings its own routing solution which might not be preferable for some users.
-- It is first and foremost a framework that just happens to use Vite under the hood, not a Vite app.
-
-This template contains as little as possible to get started with Vite + Svelte, while taking into account the developer experience with regards to HMR and intellisense. It demonstrates capabilities on par with the other `create-vite` templates and is a good starting point for beginners dipping their toes into a Vite + Svelte project.
-
-Should you later need the extended capabilities and extensibility provided by SvelteKit, the template has been structured similarly to SvelteKit so that it is easy to migrate.
-
-**Why include `.vscode/extensions.json`?**
-
-Other templates indirectly recommend extensions via the README, but this file allows VS Code to prompt the user to install the recommended extension upon opening the project.
-
-**Why enable `checkJs` in the JS template?**
-
-It is likely that most cases of changing variable types in runtime are likely to be accidental, rather than deliberate. This provides advanced typechecking out of the box. Should you like to take advantage of the dynamically-typed nature of JavaScript, it is trivial to change the configuration.
-
-**Why is HMR not preserving my local component state?**
-
-HMR state preservation comes with a number of gotchas! It has been disabled by default in both `svelte-hmr` and `@sveltejs/vite-plugin-svelte` due to its often surprising behavior. You can read the details [here](https://github.com/sveltejs/svelte-hmr/tree/master/packages/svelte-hmr#preservation-of-local-state).
-
-If you have state that's important to retain within a component, consider creating an external store which would not be replaced by HMR.
-
-```js
-// store.js
-// An extremely simple external store
-import { writable } from 'svelte/store'
-export default writable(0)
+# 预览生产构建
+npm run preview
 ```
+
+## 部署到 GitHub Pages
+
+本项目已配置 GitHub Actions 自动部署到 GitHub Pages。
+
+### 设置步骤
+
+1. **创建 GitHub 仓库**
+   ```bash
+   git remote add origin https://github.com/YOUR_USERNAME/anki-template-designer.git
+   git push -u origin main
+   ```
+
+2. **启用 GitHub Pages**
+   - 进入仓库 Settings → Pages
+   - Source 选择 "GitHub Actions"
+   - 保存设置
+
+3. **更新 base 路径（如果需要）**
+   - 如果仓库名不是 `anki-template-designer`，需要修改 `vite.config.js` 中的 `base` 路径
+   - 例如：如果仓库名是 `my-anki-designer`，则改为 `base: '/my-anki-designer/'`
+
+4. **推送代码**
+   - 每次推送到 `main` 分支时，GitHub Actions 会自动构建并部署
+
+### 自定义域名（可选）
+
+如果使用自定义域名：
+1. 在仓库 Settings → Pages 中设置 Custom domain
+2. 修改 `vite.config.js` 中的 `base` 为 `'/'`
+3. 重新部署
+
+## 技术栈
+
+- [Svelte 5](https://svelte.dev/) - UI 框架
+- [Vite](https://vitejs.dev/) - 构建工具
+- [TypeScript](https://www.typescriptlang.org/) - 类型安全
+- [IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API) - 本地存储
+
+## 许可证
+
+MIT
