@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Anki reference files (can be re-synced with pnpm sync-anki)
+anki-reference/
+

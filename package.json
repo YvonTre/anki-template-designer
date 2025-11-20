@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "sync-anki": "node scripts/sync-anki-reference.mjs"
   },
   "devDependencies": {
     "@popperjs/core": "^2.11.8",
