@@ -6,17 +6,27 @@
   import PreviewPane from "./PreviewPane.svelte";
   import Toast from "./Toast.svelte";
   import { appState } from "../stores/appState.svelte.js";
+  import { locale as localeStore, translate, getLocale } from "../i18n.js";
+
+  let currentLocale = $state(getLocale());
+  $effect(() => {
+    const unsubscribe = localeStore.subscribe((value) => {
+      currentLocale = value;
+    });
+    return () => unsubscribe();
+  });
+  const t = (key: string) => translate(currentLocale, key);
 
   function handleExport() {
     // Create a text content with the template data
     const content = `
-Front Template:
+${t("export.frontLabel")}
 ${appState.templates.front}
 
-Back Template:
+${t("export.backLabel")}
 ${appState.templates.back}
 
-Styling:
+${t("export.cssLabel")}
 ${appState.templates.css}
     `.trim();
 
@@ -25,7 +35,7 @@ ${appState.templates.css}
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "anki-template.txt";
+    a.download = t("export.fileName");
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);

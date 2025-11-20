@@ -1,5 +1,6 @@
 import type { CompletionContext, CompletionResult } from '@codemirror/autocomplete';
 import { appState } from '../stores/appState.svelte.js';
+import { getLocale, translate } from '../i18n.js';
 
 /**
  * List of Anki CSS variables
@@ -50,6 +51,7 @@ function getCurrentFields(): string[] {
 export function ankiFieldCompletions(
   context: CompletionContext
 ): CompletionResult | null {
+  const lang = getLocale();
   const { state, pos } = context;
   const text = state.doc.toString();
   const before = text.slice(Math.max(0, pos - 50), pos);
@@ -64,7 +66,7 @@ export function ankiFieldCompletions(
         label: `c${i + 1}`,
         type: 'cloze-number',
         apply: `c${i + 1}::`, // Automatically add ::
-        info: `Cloze deletion ${i + 1}`,
+        info: translate(lang, 'codeEditor.clozeNumberInfo', { index: i + 1 }),
         boost: 10 - i, // Prioritize earlier numbers
       })),
     };
@@ -99,7 +101,7 @@ export function ankiFieldCompletions(
           label: field,
           type: 'field',
           apply: `${field}${insertSuffix}`, // Add }} or } based on context
-          info: `Field: ${field}`,
+          info: translate(lang, 'codeEditor.fieldInfo', { field }),
         })),
     };
   }
@@ -139,7 +141,7 @@ export function ankiFieldCompletions(
           label: field,
           type: 'field',
           apply: `${field}${insertSuffix}`,
-          info: `Field: ${field}`,
+        info: translate(lang, 'codeEditor.fieldInfo', { field }),
         });
       });
 
@@ -152,7 +154,7 @@ export function ankiFieldCompletions(
         label: field,
         type: 'special-field',
         apply: `${field}${insertSuffix}`,
-        info: `Special field: ${field}`,
+        info: translate(lang, 'codeEditor.specialFieldInfo', { field }),
       });
     });
 
@@ -162,7 +164,7 @@ export function ankiFieldCompletions(
         label: 'cloze:',
         type: 'keyword',
         apply: 'cloze:',
-        info: 'Cloze deletion syntax: {{cloze:FieldName}}',
+        info: translate(lang, 'codeEditor.clozeSyntaxInfo'),
       });
     }
 
@@ -184,6 +186,7 @@ export function ankiFieldCompletions(
 export function ankiCssVarCompletions(
   context: CompletionContext
 ): CompletionResult | null {
+  const lang = getLocale();
   const { state, pos } = context;
   const text = state.doc.toString();
   const before = text.slice(Math.max(0, pos - 30), pos);
@@ -201,7 +204,7 @@ export function ankiCssVarCompletions(
         label: v,
         type: 'variable',
         apply: v,
-        info: `Anki CSS variable`,
+        info: translate(lang, 'codeEditor.cssVarInfo'),
       })),
     };
   }
@@ -219,7 +222,7 @@ export function ankiCssVarCompletions(
         label: v,
         type: 'variable',
         apply: v,
-        info: `Anki CSS variable`,
+        info: translate(lang, 'codeEditor.cssVarInfo'),
       })),
     };
   }

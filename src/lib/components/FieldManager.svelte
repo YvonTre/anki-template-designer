@@ -8,6 +8,7 @@
     switchNoteType,
     triggerAutoSaveOnSampleDataChange,
   } from "../stores/appState.svelte.js";
+  import { locale as localeStore, translate, getLocale } from "../i18n.js";
 
   let newFieldName = $state("");
   let newNoteTypeName = $state("");
@@ -36,11 +37,21 @@
     appState.noteTypes.find((n) => n.name === appState.currentNoteTypeId)
       ?.fields || [],
   );
+  let currentLocale = $state(getLocale());
+  $effect(() => {
+    const unsubscribe = localeStore.subscribe((value) => {
+      currentLocale = value;
+    });
+    return () => unsubscribe();
+  });
+
+  const t = (key: string, values?: Record<string, string>) =>
+    translate(currentLocale, key, values);
 </script>
 
 <div class="field-manager">
   <div class="note-type-section">
-    <div class="header">Note Type</div>
+    <div class="header">{t("fieldManager.noteType")}</div>
     <div class="controls">
       <select
         value={appState.currentNoteTypeId}
@@ -52,11 +63,11 @@
       </select>
       <button
         onclick={() => (isAddingNoteType = !isAddingNoteType)}
-        title="Add Note Type">+</button
+        title={t("fieldManager.addNoteType")}>+</button
       >
       <button
         onclick={() => deleteNoteType(appState.currentNoteTypeId)}
-        title="Delete Note Type"
+        title={t("fieldManager.deleteNoteType")}
         disabled={appState.noteTypes.length <= 1}>-</button
       >
     </div>
@@ -65,16 +76,16 @@
       <div class="add-note-type">
         <input
           type="text"
-          placeholder="Note Type Name..."
+          placeholder={t("common.placeholders.noteTypeName")}
           bind:value={newNoteTypeName}
           onkeydown={(e) => e.key === "Enter" && handleAddNoteType()}
         />
-        <button onclick={handleAddNoteType}>Add</button>
+        <button onclick={handleAddNoteType}>{t("fieldManager.add")}</button>
       </div>
     {/if}
   </div>
 
-  <div class="header">Fields</div>
+  <div class="header">{t("fieldManager.fields")}</div>
   <div class="field-list">
     {#each currentFields as field}
       <div class="field-item">
@@ -83,11 +94,11 @@
           <button
             class="icon-btn"
             onclick={() => removeField(field)}
-            title="Remove Field">×</button
+            title={t("fieldManager.removeField")}>×</button
           >
         </div>
         <textarea
-          placeholder="Sample data for {field}..."
+          placeholder={t("common.placeholders.sampleData", { field })}
           bind:value={appState.sampleData[field]}
           oninput={() => triggerAutoSaveOnSampleDataChange()}
         ></textarea>
@@ -97,7 +108,7 @@
   <div class="add-field">
     <input
       type="text"
-      placeholder="New field name..."
+      placeholder={t("common.placeholders.newFieldName")}
       bind:value={newFieldName}
       onkeydown={handleKeydown}
     />

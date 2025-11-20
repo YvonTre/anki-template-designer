@@ -1,5 +1,6 @@
 <script lang="ts">
   import { tick } from 'svelte';
+  import { locale as localeStore, translate, getLocale } from '../i18n.js';
   interface Props {
     open: boolean;
     title: string;
@@ -14,19 +15,30 @@
     open,
     title,
     message,
-    confirmText = '确定',
-    cancelText = '取消',
+    confirmText,
+    cancelText,
     onConfirm,
     onCancel,
   }: Props = $props();
 
   let dialogRef = $state<HTMLDivElement | null>(null);
+  let currentLocale = $state(getLocale());
+  $effect(() => {
+    const unsubscribe = localeStore.subscribe((value) => {
+      currentLocale = value;
+    });
+    return () => unsubscribe();
+  });
+  const t = (key: string) => translate(currentLocale, key);
+  let resolvedConfirmText = $derived.by(() => confirmText ?? t('common.buttons.confirm'));
+  let resolvedCancelText = $derived.by(() => cancelText ?? t('common.buttons.cancel'));
 
-  $effect(async () => {
-    if (open) {
+  $effect(() => {
+    if (!open) return;
+    (async () => {
       await tick();
       dialogRef?.focus();
-    }
+    })();
   });
 
   function handleOverlayClick(event: MouseEvent) {
@@ -57,7 +69,7 @@
   <div
     class="overlay"
     role="button"
-    aria-label="关闭对话框"
+    aria-label={t('confirmDialog.overlayAria')}
     tabindex="0"
     onclick={handleOverlayClick}
     onkeydown={handleOverlayKeydown}
@@ -78,8 +90,8 @@
         <p>{message}</p>
       </div>
       <div class="actions">
-        <button class="cancel-btn" onclick={onCancel}>{cancelText}</button>
-        <button class="confirm-btn" onclick={onConfirm}>{confirmText}</button>
+        <button class="cancel-btn" onclick={onCancel}>{resolvedCancelText}</button>
+        <button class="confirm-btn" onclick={onConfirm}>{resolvedConfirmText}</button>
       </div>
     </div>
   </div>

@@ -5,6 +5,7 @@
   import IconSpinner from '~icons/svg-spinners/ring-resize';
   import IconCheck from '~icons/mdi/check';
   import IconError from '~icons/mdi/alert-circle';
+  import { locale as localeStore, translate, getLocale } from '../i18n.js';
 
   interface Props {
     onExport: () => void;
@@ -39,18 +40,27 @@
   let isSaving = $derived(saveState.isSaving);
   let isAutoSaving = $derived(autoSaveState.isSaving);
   let hasUnsavedChanges = $derived(getHasUnsavedChanges());
+  let currentLocale = $state(getLocale());
+  $effect(() => {
+    const unsubscribe = localeStore.subscribe((value) => {
+      currentLocale = value;
+    });
+    return () => unsubscribe();
+  });
+
+  const t = (key: string) => translate(currentLocale, key);
 </script>
 
 <header>
   <div class="logo">
-    <h1>Anki Template Designer</h1>
+    <h1>{t('header.title')}</h1>
     {#if appState.currentTemplateId && appState.currentTemplateName}
       <span class="template-indicator">{appState.currentTemplateName}</span>
       {#if hasUnsavedChanges}
-        <span class="template-indicator unsaved">未保存</span>
+        <span class="template-indicator unsaved">{t('common.unsaved')}</span>
       {/if}
     {:else}
-      <span class="template-indicator unsaved">未保存</span>
+      <span class="template-indicator unsaved">{t('common.unsaved')}</span>
     {/if}
     {#if appState.currentTemplateId && (saveStatus !== 'idle' || autoSaveStatus !== 'idle')}
       <div class="save-status">
@@ -58,43 +68,43 @@
           <span class="spinner" aria-hidden="true">
             <IconSpinner />
           </span>
-          <span>保存中...</span>
+          <span>{t('common.status.saving')}</span>
         {:else if isAutoSaving}
           <span class="spinner" aria-hidden="true">
             <IconSpinner />
           </span>
-          <span>自动保存中...</span>
+          <span>{t('common.status.autoSaving')}</span>
         {:else if saveStatus === 'saved'}
           <span class="check-icon" aria-hidden="true">
             <IconCheck />
           </span>
-          <span>保存成功</span>
+          <span>{t('common.status.saved')}</span>
         {:else if autoSaveStatus === 'saved'}
           <span class="check-icon" aria-hidden="true">
             <IconCheck />
           </span>
-          <span>已自动保存</span>
+          <span>{t('common.status.autoSaved')}</span>
         {:else if saveStatus === 'error' || autoSaveStatus === 'error'}
           <span class="error-icon" aria-hidden="true">
             <IconError />
           </span>
-          <span>保存失败</span>
+          <span>{t('common.status.error')}</span>
         {/if}
       </div>
     {/if}
   </div>
   <div class="controls">
-    <button onclick={handleNew}>➕ 新建</button>
+    <button onclick={handleNew}>➕ {t('common.buttons.new')}</button>
     <button onclick={handleSave} disabled={isSaving}>
       {#if isSaving}
         <span class="spinner" aria-hidden="true">
           <IconSpinner />
         </span>
       {/if}
-      <span>💾 保存</span>
+      <span>💾 {t('common.buttons.save')}</span>
     </button>
-    <button onclick={() => (showLoadDialog = true)}>📂 加载</button>
-    <button class="primary" onclick={onExport}> Export </button>
+    <button onclick={() => (showLoadDialog = true)}>📂 {t('common.buttons.load')}</button>
+    <button class="primary" onclick={onExport}>{t('common.buttons.export')}</button>
   </div>
 </header>
 

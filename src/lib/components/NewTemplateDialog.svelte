@@ -2,6 +2,7 @@
   import { tick } from 'svelte';
   import { createNewTemplate } from '../stores/appState.svelte.js';
   import * as Toast from '../stores/toast.svelte.js';
+  import { locale as localeStore, translate, getLocale } from '../i18n.js';
 
   interface Props {
     open: boolean;
@@ -15,19 +16,28 @@
   let creating = $state(false);
   let dialogRef = $state<HTMLDivElement | null>(null);
   let nameInput = $state<HTMLInputElement | null>(null);
+  let currentLocale = $state(getLocale());
+  $effect(() => {
+    const unsubscribe = localeStore.subscribe((value) => {
+      currentLocale = value;
+    });
+    return () => unsubscribe();
+  });
+  const t = (key: string) => translate(currentLocale, key);
 
-  $effect(async () => {
-    if (open) {
-      templateName = initialName || '';
+  $effect(() => {
+    if (!open) return;
+    templateName = initialName || '';
+    (async () => {
       await tick();
       dialogRef?.focus();
       nameInput?.focus();
-    }
+    })();
   });
 
   async function handleCreate() {
     if (!templateName.trim()) {
-      Toast.error('请输入模板名称');
+      Toast.error(t('newTemplateDialog.toast.missingName'));
       return;
     }
 
@@ -35,11 +45,11 @@
     try {
       await createNewTemplate(templateName.trim());
       templateName = '';
-      Toast.success('模板创建成功');
+      Toast.success(t('newTemplateDialog.toast.success'));
       onClose();
     } catch (error) {
       console.error('Failed to create template:', error);
-      Toast.error('创建失败');
+      Toast.error(t('newTemplateDialog.toast.error'));
     } finally {
       creating = false;
     }
@@ -70,7 +80,7 @@
   <div
     class="overlay"
     role="button"
-    aria-label="关闭新建模板对话框"
+    aria-label={t('newTemplateDialog.overlayAria')}
     tabindex="0"
     onclick={handleOverlayClick}
     onkeydown={handleOverlayKeydown}
@@ -85,18 +95,18 @@
       onkeydown={handleDialogKeydown}
     >
       <div class="header">
-        <h2 id="dialog-title">新建模板</h2>
-        <button class="close-btn" onclick={onClose} aria-label="关闭">×</button>
+        <h2 id="dialog-title">{t('newTemplateDialog.title')}</h2>
+        <button class="close-btn" onclick={onClose} aria-label={t('common.aria.close')}>×</button>
       </div>
 
       <div class="content">
-        <p class="description">创建一个新模板，当前的所有设置将被保存。</p>
+        <p class="description">{t('newTemplateDialog.description')}</p>
         <div class="input-group">
-          <label for="template-name">模板名称</label>
+          <label for="template-name">{t('newTemplateDialog.label')}</label>
           <input
             id="template-name"
             type="text"
-            placeholder="输入模板名称..."
+            placeholder={t('newTemplateDialog.placeholder')}
             bind:value={templateName}
             onkeydown={(e) => e.key === 'Enter' && handleCreate()}
             disabled={creating}
@@ -105,10 +115,10 @@
         </div>
         <div class="actions">
           <button class="create-btn" onclick={handleCreate} disabled={creating || !templateName.trim()}>
-            {creating ? '创建中...' : '创建'}
+            {creating ? t('newTemplateDialog.creating') : t('newTemplateDialog.create')}
           </button>
           <button class="cancel-btn" onclick={onClose} disabled={creating}>
-            取消
+            {t('newTemplateDialog.cancel')}
           </button>
         </div>
       </div>

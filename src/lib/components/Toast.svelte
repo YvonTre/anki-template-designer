@@ -1,14 +1,23 @@
 <script lang="ts">
   import { getToasts, removeToast } from '../stores/toast.svelte.js';
+  import { locale as localeStore, translate, getLocale } from '../i18n.js';
 
   let toasts = $derived(getToasts());
+  let currentLocale = $state(getLocale());
+  $effect(() => {
+    const unsubscribe = localeStore.subscribe((value) => {
+      currentLocale = value;
+    });
+    return () => unsubscribe();
+  });
+  const t = (key: string) => translate(currentLocale, key);
 </script>
 
 <div class="toast-container">
   {#each toasts as toast}
     <div class="toast toast-{toast.type}" role="alert">
       <span class="toast-message">{toast.message}</span>
-      <button class="toast-close" onclick={() => removeToast(toast.id)} aria-label="关闭">×</button>
+      <button class="toast-close" onclick={() => removeToast(toast.id)} aria-label={t('toast.closeAria')}>×</button>
     </div>
   {/each}
 </div>

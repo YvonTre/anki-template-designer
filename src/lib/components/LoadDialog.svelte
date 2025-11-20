@@ -4,6 +4,7 @@
   import { loadFromStorage } from '../stores/appState.svelte.js';
   import * as Toast from '../stores/toast.svelte.js';
   import ConfirmDialog from './ConfirmDialog.svelte';
+  import { locale as localeStore, translate, formatDateTime, getLocale } from '../i18n.js';
 
   interface Props {
     open: boolean;
@@ -19,13 +20,23 @@
   let deletingId: string | null = $state(null);
   let showConfirmDelete = $state(false);
   let pendingDeleteId: string | null = $state(null);
+  let currentLocale = $state(getLocale());
+  $effect(() => {
+    const unsubscribe = localeStore.subscribe((value) => {
+      currentLocale = value;
+    });
+    return () => unsubscribe();
+  });
+  const t = (key: string, values?: Record<string, string>) =>
+    translate(currentLocale, key, values);
 
-  $effect(async () => {
-    if (open) {
+  $effect(() => {
+    if (!open) return;
+    (async () => {
       await tick();
       dialogRef?.focus();
       await loadTemplates();
-    }
+    })();
   });
 
   async function getStorage() {
@@ -43,7 +54,7 @@
       templates = await storage.getAllTemplates();
     } catch (error) {
       console.error('Failed to load templates:', error);
-      Toast.error('加载模板列表失败');
+      Toast.error(t('loadDialog.toast.listError'));
     } finally {
       isLoading = false;
     }
@@ -52,11 +63,11 @@
   async function handleLoad(id: string) {
     try {
       await loadFromStorage(id);
-      Toast.success('模板加载成功');
+      Toast.success(t('loadDialog.toast.loadSuccess'));
       onClose();
     } catch (error) {
       console.error('Failed to load:', error);
-      Toast.error('加载失败');
+      Toast.error(t('loadDialog.toast.loadError'));
     }
   }
 
@@ -75,11 +86,11 @@
     try {
       const storage = await getStorage();
       await storage.deleteTemplate(pendingDeleteId);
-      Toast.success('模板删除成功');
+      Toast.success(t('loadDialog.toast.deleteSuccess'));
       await loadTemplates();
     } catch (error) {
       console.error('Failed to delete:', error);
-      Toast.error('删除失败');
+      Toast.error(t('loadDialog.toast.deleteError'));
     } finally {
       deletingId = null;
       pendingDeleteId = null;
@@ -92,8 +103,7 @@
   }
 
   function formatDate(timestamp: number): string {
-    const date = new Date(timestamp);
-    return date.toLocaleString('zh-CN', {
+    return formatDateTime(timestamp, currentLocale, {
       year: 'numeric',
       month: '2-digit',
       day: '2-digit',
@@ -127,7 +137,7 @@
   <div
     class="overlay"
     role="button"
-    aria-label="关闭加载模板对话框"
+    aria-label={t('loadDialog.overlayAria')}
     tabindex="0"
     onclick={handleOverlayClick}
     onkeydown={handleOverlayKeydown}
@@ -142,16 +152,16 @@
       onkeydown={handleDialogKeydown}
     >
       <div class="header">
-        <h2 id="dialog-title">加载模板</h2>
-        <button class="close-btn" onclick={onClose} aria-label="关闭">×</button>
+        <h2 id="dialog-title">{t('loadDialog.title')}</h2>
+        <button class="close-btn" onclick={onClose} aria-label={t('common.aria.close')}>×</button>
       </div>
 
       <div class="content">
         <div class="templates-list">
           {#if isLoading}
-            <div class="loading">加载中...</div>
+            <div class="loading">{t('loadDialog.loading')}</div>
           {:else if templates.length === 0}
-            <div class="empty">暂无保存的模板</div>
+            <div class="empty">{t('loadDialog.empty')}</div>
           {:else}
             <div class="template-items">
               {#each templates as template}
@@ -165,7 +175,7 @@
                   <div class="template-info">
                     <div class="template-name">{template.name}</div>
                     <div class="template-meta">
-                      更新于 {formatDate(template.updatedAt)}
+                      {t('loadDialog.updatedAt', { date: formatDate(template.updatedAt) })}
                     </div>
                   </div>
                   <button
@@ -173,7 +183,7 @@
                     onclick={(e) => handleDeleteClick(template.id, e)}
                     disabled={deletingId === template.id}
                   >
-                    {deletingId === template.id ? '删除中...' : '删除'}
+                    {deletingId === template.id ? t('loadDialog.deleting') : t('loadDialog.delete')}
                   </button>
                 </div>
               {/each}
@@ -187,10 +197,10 @@
 
 <ConfirmDialog
   open={showConfirmDelete}
-  title="删除模板"
-  message="确定要删除这个模板吗？此操作无法撤销。"
-  confirmText="删除"
-  cancelText="取消"
+  title={t('loadDialog.confirmTitle')}
+  message={t('loadDialog.confirmMessage')}
+  confirmText={t('common.buttons.delete')}
+  cancelText={t('common.buttons.cancel')}
   onConfirm={confirmDelete}
   onCancel={cancelDelete}
 />

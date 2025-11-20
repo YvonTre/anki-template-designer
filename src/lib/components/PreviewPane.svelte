@@ -1,5 +1,7 @@
 <script lang="ts">
   import { appState } from "../stores/appState.svelte.js";
+  import { generateAnkiCss } from "../anki-styles";
+  import { locale as localeStore, translate, getLocale } from "../i18n.js";
 
   // Simple template renderer
   function renderTemplate(template: string, fields: Record<string, string>, isFront: boolean = false) {
@@ -85,9 +87,15 @@
     appState.ui.isNight = !appState.ui.isNight;
   }
 
-  import { generateAnkiCss } from "../anki-styles";
-
   let iframe: HTMLIFrameElement;
+  let currentLocale = $state(getLocale());
+  $effect(() => {
+    const unsubscribe = localeStore.subscribe((value) => {
+      currentLocale = value;
+    });
+    return () => unsubscribe();
+  });
+  const t = (key: string) => translate(currentLocale, key);
 
   $effect(() => {
     if (!iframe?.contentDocument) return;
@@ -114,12 +122,13 @@
 
     // Construct the full HTML document
     // Matching Anki's stdHtml structure with dir and data-bs-theme attributes
+    const documentTitle = t("previewPane.documentTitle");
     const html = `
       <!DOCTYPE html>
       <html class="${isNight ? "night-mode" : ""}" dir="ltr" data-bs-theme="${isNight ? "dark" : "light"}">
       <head>
         <meta charset="utf-8">
-        <title>Anki Preview</title>
+        <title>${documentTitle}</title>
         <style>${standardCss}</style>
         <style>${css}</style>
       </head>
@@ -141,25 +150,25 @@
     <div class="tabs">
       <button
         class:active={activeTab === "front"}
-        onclick={() => (activeTab = "front")}>Front</button
+        onclick={() => (activeTab = "front")}>{t("previewPane.frontTab")}</button
       >
       <button
         class:active={activeTab === "back"}
-        onclick={() => (activeTab = "back")}>Back</button
+        onclick={() => (activeTab = "back")}>{t("previewPane.backTab")}</button
       >
     </div>
     <div class="toggles">
       <button
         class:active={isMobile}
         onclick={toggleMobile}
-        title="Toggle Mobile View"
+        title={t("common.aria.toggleMobile")}
       >
         📱
       </button>
       <button
         class:active={isNight}
         onclick={toggleNight}
-        title="Toggle Night Mode"
+        title={t("common.aria.toggleNight")}
       >
         🌙
       </button>
@@ -170,7 +179,7 @@
     <div class="iframe-container">
       <iframe
         bind:this={iframe}
-        title="Card Preview"
+        title={t("previewPane.iframeTitle")}
         sandbox="allow-same-origin allow-scripts"
       ></iframe>
     </div>

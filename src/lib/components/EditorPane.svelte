@@ -2,16 +2,26 @@
   import { appState, triggerTemplateChange } from "../stores/appState.svelte.js";
   import SplitPane from "./SplitPane.svelte";
   import CodeMirrorEditor from "./CodeMirrorEditor.svelte";
+  import { locale as localeStore, translate, getLocale } from "../i18n.js";
+
+  let currentLocale = $state(getLocale());
+  $effect(() => {
+    const unsubscribe = localeStore.subscribe((value) => {
+      currentLocale = value;
+    });
+    return () => unsubscribe();
+  });
+  const t = (key: string) => translate(currentLocale, key);
 </script>
 
 <SplitPane direction="vertical" initialSize={33}>
   {#snippet pane1()}
     <div class="editor-container">
-      <div class="editor-header">Front Template</div>
+      <div class="editor-header">{t("editorPane.front")}</div>
       <CodeMirrorEditor
         bind:value={appState.templates.front}
         language="html"
-        placeholder="Front Template HTML..."
+        placeholder={t("common.placeholders.frontHtml")}
         onInput={triggerTemplateChange}
       />
     </div>
@@ -20,22 +30,22 @@
     <SplitPane direction="vertical" initialSize={50}>
       {#snippet pane1()}
         <div class="editor-container">
-          <div class="editor-header">Back Template</div>
+          <div class="editor-header">{t("editorPane.back")}</div>
           <CodeMirrorEditor
             bind:value={appState.templates.back}
             language="html"
-            placeholder="Back Template HTML..."
+            placeholder={t("common.placeholders.backHtml")}
             onInput={triggerTemplateChange}
           />
         </div>
       {/snippet}
       {#snippet pane2()}
         <div class="editor-container">
-          <div class="editor-header">Styling (CSS)</div>
+          <div class="editor-header">{t("editorPane.css")}</div>
           <CodeMirrorEditor
             bind:value={appState.templates.css}
             language="css"
-            placeholder="CSS..."
+            placeholder={t("common.placeholders.css")}
             onInput={triggerTemplateChange}
           />
         </div>

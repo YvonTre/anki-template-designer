@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
+  import { locale as localeStore, translate, getLocale } from "../i18n.js";
 
   interface Props {
     pane1: Snippet;
@@ -18,6 +19,14 @@
   let container: HTMLDivElement;
   let isDragging = false;
   let size = $state(initialSize);
+  let currentLocale = $state(getLocale());
+  $effect(() => {
+    const unsubscribe = localeStore.subscribe((value) => {
+      currentLocale = value;
+    });
+    return () => unsubscribe();
+  });
+  const t = (key: string) => translate(currentLocale, key);
 
   function startDrag() {
     isDragging = true;
@@ -63,7 +72,7 @@
     onmousedown={startDrag}
     role="separator"
     tabindex="0"
-    aria-label="Resize split pane"
+    aria-label={t("common.aria.resizeSplitPane")}
   ></div>
 
   <div class="pane second" style="flex-basis: {100 - size}%">
