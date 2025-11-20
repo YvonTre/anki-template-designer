@@ -36,15 +36,14 @@
     const languageExtension =
       language === 'html' ? html() : css();
 
-    // Select completion source based on language
-    const completionSource =
-      language === 'html'
-        ? autocompletion({
-            override: [ankiFieldCompletions],
-          })
-        : autocompletion({
-            override: [ankiCssVarCompletions],
-          });
+    const customCompletionExtension = EditorState.languageData.of(() => [
+      {
+        autocomplete:
+          language === 'html'
+            ? ankiFieldCompletions
+            : ankiCssVarCompletions,
+      },
+    ]);
 
     // Create editor state
     const startState = EditorState.create({
@@ -52,7 +51,8 @@
       extensions: [
         history(), // Undo/redo support
         languageExtension,
-        completionSource,
+        autocompletion(),
+        customCompletionExtension,
         oneDark, // Use dark theme to match existing design
         keymap.of([
           ...defaultKeymap,
