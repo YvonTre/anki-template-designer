@@ -1,0 +1,53 @@
+---
+description: Localization guidance for user-facing text
+apply: intelligently
+applyWhen: Add or modify user-visible strings, defaults, or localization logic
+---
+# Localization Rules
+
+## Scope
+
+These rules govern all text shown in the UI, exported artifacts, and generated helper content (e.g., default templates, sample data, completion tooltips). They apply to any component or utility that renders user-visible strings.
+
+## Language Support
+
+1. The application currently supports only **English (`en`)** and **Simplified Chinese (`zh`)**.
+2. Use the shared dictionary defined in `src/lib/i18n.ts`. All user-facing text **must** reference this dictionary via `translate()`.
+3. For new strings:
+   - Add the key under the appropriate namespace (e.g., `common`, `editorPane`, `defaults`).
+   - Provide both English and Chinese translations at the same time.
+
+## Locale Detection
+
+1. The active locale is determined by `navigator.languages` / `navigator.language` at startup.
+2. The `languagechange` browser event automatically updates the locale store; components must subscribe to `locale` to react to runtime changes.
+3. Always call `getLocale()` for initial values, then subscribe to `locale` (a Svelte store) to keep them in sync.
+4. `document.documentElement.lang` must be updated whenever the locale changes (handled centrally in `i18n.ts`).
+
+## Component Integration
+
+1. Components must **not** hardcode strings. Instead:
+   - Import `{ locale as localeStore, translate, getLocale }`.
+   - Keep a local `$state(getLocale())`.
+   - Subscribe to `localeStore` inside `$effect` to update the local state.
+   - Use helper functions (`const t = (key) => translate(currentLocale, key)`) to render text.
+2. When conditionally rendering labels (e.g., note-type names), map internal IDs (e.g., `Basic`, `Cloze`) to translated labels before display.
+3. Ensure all ARIA labels, tooltips, placeholder texts, and toast messages are localized.
+
+## Default Content
+
+1. Default templates (Basic/Cloze) remain the same, but sample data must come from `defaults.sampleData` keys in the dictionary to reflect the current language.
+2. When deriving new default data (e.g., after adding a note type), use `translate()` to populate user-facing strings.
+
+## Utilities
+
+1. CodeMirror completion helpers (`ankiCompletions`) must use the current locale for `info` tooltips.
+2. Any new helper function that shows content (e.g., export handlers) must rely on `translate()` instead of literals.
+
+## Testing Checklist
+
+Before shipping localization changes:
+
+1. Switch browser locale to English and Chinese; verify all UI strings, dialogs, toasts, and placeholders update accordingly.
+2. Trigger `languagechange` (e.g., via DevTools overrides) to ensure live updates without refresh.
+3. Confirm exported files, default sample data, and completion tooltips use the selected language.
