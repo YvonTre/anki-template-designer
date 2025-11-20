@@ -188,6 +188,7 @@
 
   textarea {
     width: 100%;
+    box-sizing: border-box;
     background: #2d2d2d;
     border: 1px solid #333;
     color: #ccc;
