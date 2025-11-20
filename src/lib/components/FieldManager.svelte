@@ -6,6 +6,7 @@
     addNoteType,
     deleteNoteType,
     switchNoteType,
+    triggerAutoSaveOnSampleDataChange,
   } from "../stores/appState.svelte.js";
 
   let newFieldName = $state("");
@@ -88,6 +89,7 @@
         <textarea
           placeholder="Sample data for {field}..."
           bind:value={appState.sampleData[field]}
+          oninput={() => triggerAutoSaveOnSampleDataChange()}
         ></textarea>
       </div>
     {/each}

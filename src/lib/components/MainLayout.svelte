@@ -4,6 +4,7 @@
   import FieldManager from "./FieldManager.svelte";
   import EditorPane from "./EditorPane.svelte";
   import PreviewPane from "./PreviewPane.svelte";
+  import Toast from "./Toast.svelte";
   import { appState } from "../stores/appState.svelte.js";
 
   function handleExport() {
@@ -55,6 +56,8 @@ ${appState.templates.css}
     </SplitPane>
   </div>
 </div>
+
+<Toast />
 
 <style>
   .app-container {

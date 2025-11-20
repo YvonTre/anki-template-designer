@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { appState } from "../stores/appState.svelte.js";
+  import { appState, triggerTemplateChange } from "../stores/appState.svelte.js";
   import SplitPane from "./SplitPane.svelte";
 </script>
 
@@ -10,6 +10,7 @@
       <textarea
         bind:value={appState.templates.front}
         placeholder="Front Template HTML..."
+        oninput={triggerTemplateChange}
       ></textarea>
     </div>
   {/snippet}
@@ -18,16 +19,20 @@
       {#snippet pane1()}
         <div class="editor-container">
           <div class="editor-header">Back Template</div>
-          <textarea
-            bind:value={appState.templates.back}
-            placeholder="Back Template HTML..."
-          ></textarea>
+      <textarea
+        bind:value={appState.templates.back}
+        placeholder="Back Template HTML..."
+        oninput={triggerTemplateChange}
+      ></textarea>
         </div>
       {/snippet}
       {#snippet pane2()}
         <div class="editor-container">
           <div class="editor-header">Styling (CSS)</div>
-          <textarea bind:value={appState.templates.css} placeholder="CSS..."
+          <textarea
+            bind:value={appState.templates.css}
+            placeholder="CSS..."
+            oninput={triggerTemplateChange}
           ></textarea>
         </div>
       {/snippet}
