@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { tick } from 'svelte';
   import { createNewTemplate } from '../stores/appState.svelte.js';
   import * as Toast from '../stores/toast.svelte.js';
 
@@ -12,10 +13,15 @@
 
   let templateName = $state(initialName);
   let creating = $state(false);
+  let dialogRef = $state<HTMLDivElement | null>(null);
+  let nameInput = $state<HTMLInputElement | null>(null);
 
-  $effect(() => {
+  $effect(async () => {
     if (open) {
       templateName = initialName || '';
+      await tick();
+      dialogRef?.focus();
+      nameInput?.focus();
     }
   });
 
@@ -38,18 +44,46 @@
       creating = false;
     }
   }
+
+  function handleOverlayClick(event: MouseEvent) {
+    if (event.target === event.currentTarget) {
+      onClose();
+    }
+  }
+
+  function handleOverlayKeydown(event: KeyboardEvent) {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      onClose();
+    }
+  }
+
+  function handleDialogKeydown(event: KeyboardEvent) {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      onClose();
+    }
+  }
 </script>
 
 {#if open}
   <div
     class="overlay"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="dialog-title"
-    onclick={onClose}
-    onkeydown={(e) => e.key === 'Escape' && onClose()}
+    role="button"
+    aria-label="关闭新建模板对话框"
+    tabindex="0"
+    onclick={handleOverlayClick}
+    onkeydown={handleOverlayKeydown}
   >
-    <div class="dialog" onclick={(e) => e.stopPropagation()}>
+    <div
+      class="dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="dialog-title"
+      tabindex="-1"
+      bind:this={dialogRef}
+      onkeydown={handleDialogKeydown}
+    >
       <div class="header">
         <h2 id="dialog-title">新建模板</h2>
         <button class="close-btn" onclick={onClose} aria-label="关闭">×</button>
@@ -66,7 +100,7 @@
             bind:value={templateName}
             onkeydown={(e) => e.key === 'Enter' && handleCreate()}
             disabled={creating}
-            autofocus
+            bind:this={nameInput}
           />
         </div>
         <div class="actions">

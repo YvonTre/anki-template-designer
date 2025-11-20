@@ -55,19 +55,29 @@
     {#if appState.currentTemplateId && (saveStatus !== 'idle' || autoSaveStatus !== 'idle')}
       <div class="save-status">
         {#if isSaving}
-          <IconSpinner class="spinner" />
+          <span class="spinner" aria-hidden="true">
+            <IconSpinner />
+          </span>
           <span>保存中...</span>
         {:else if isAutoSaving}
-          <IconSpinner class="spinner" />
+          <span class="spinner" aria-hidden="true">
+            <IconSpinner />
+          </span>
           <span>自动保存中...</span>
         {:else if saveStatus === 'saved'}
-          <IconCheck class="check-icon" />
+          <span class="check-icon" aria-hidden="true">
+            <IconCheck />
+          </span>
           <span>保存成功</span>
         {:else if autoSaveStatus === 'saved'}
-          <IconCheck class="check-icon" />
+          <span class="check-icon" aria-hidden="true">
+            <IconCheck />
+          </span>
           <span>已自动保存</span>
         {:else if saveStatus === 'error' || autoSaveStatus === 'error'}
-          <IconError class="error-icon" />
+          <span class="error-icon" aria-hidden="true">
+            <IconError />
+          </span>
           <span>保存失败</span>
         {/if}
       </div>
@@ -77,7 +87,9 @@
     <button onclick={handleNew}>➕ 新建</button>
     <button onclick={handleSave} disabled={isSaving}>
       {#if isSaving}
-        <IconSpinner class="spinner" />
+        <span class="spinner" aria-hidden="true">
+          <IconSpinner />
+        </span>
       {/if}
       <span>💾 保存</span>
     </button>
@@ -205,6 +217,21 @@
     width: 14px;
     height: 14px;
     animation: spin 1s linear infinite;
+  }
+
+  .spinner,
+  .check-icon,
+  .error-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .spinner :global(svg),
+  .check-icon :global(svg),
+  .error-icon :global(svg) {
+    width: 100%;
+    height: 100%;
   }
 
   button.primary {

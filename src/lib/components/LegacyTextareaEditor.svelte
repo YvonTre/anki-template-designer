@@ -24,8 +24,8 @@
     class="fallback-textarea"
     bind:value={value}
     placeholder={placeholder}
-    on:input={handleInput}
-  />
+    oninput={handleInput}
+  ></textarea>
 </div>
 
 <style>

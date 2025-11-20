@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { tick } from 'svelte';
   interface Props {
     open: boolean;
     title: string;
@@ -18,21 +19,58 @@
     onConfirm,
     onCancel,
   }: Props = $props();
+
+  let dialogRef = $state<HTMLDivElement | null>(null);
+
+  $effect(async () => {
+    if (open) {
+      await tick();
+      dialogRef?.focus();
+    }
+  });
+
+  function handleOverlayClick(event: MouseEvent) {
+    if (event.target === event.currentTarget) {
+      onCancel();
+    }
+  }
+
+  function handleOverlayKeydown(event: KeyboardEvent) {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      onCancel();
+    }
+  }
+
+  function handleDialogKeydown(event: KeyboardEvent) {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      onCancel();
+    } else if (event.key === 'Enter') {
+      event.preventDefault();
+      onConfirm();
+    }
+  }
 </script>
 
 {#if open}
   <div
     class="overlay"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="confirm-title"
-    onclick={onCancel}
-    onkeydown={(e) => {
-      if (e.key === 'Escape') onCancel();
-      if (e.key === 'Enter') onConfirm();
-    }}
+    role="button"
+    aria-label="关闭对话框"
+    tabindex="0"
+    onclick={handleOverlayClick}
+    onkeydown={handleOverlayKeydown}
   >
-    <div class="dialog" onclick={(e) => e.stopPropagation()}>
+    <div
+      class="dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="confirm-title"
+      tabindex="-1"
+      bind:this={dialogRef}
+      onkeydown={handleDialogKeydown}
+    >
       <div class="header">
         <h2 id="confirm-title">{title}</h2>
       </div>

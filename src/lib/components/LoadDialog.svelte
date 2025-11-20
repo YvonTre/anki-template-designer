@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { storage, type SavedTemplate } from '../utils/storage.js';
+  import { tick } from 'svelte';
+  import type { SavedTemplate } from '../utils/storage.js';
   import { loadFromStorage } from '../stores/appState.svelte.js';
   import * as Toast from '../stores/toast.svelte.js';
   import ConfirmDialog from './ConfirmDialog.svelte';
@@ -10,6 +11,8 @@
   }
 
   let { open, onClose }: Props = $props();
+  let dialogRef = $state<HTMLDivElement | null>(null);
+  let storageInstance: typeof import('../utils/storage.js')['storage'] | null = null;
 
   let templates = $state<SavedTemplate[]>([]);
   let isLoading = $state(false);
@@ -17,15 +20,26 @@
   let showConfirmDelete = $state(false);
   let pendingDeleteId: string | null = $state(null);
 
-  $effect(() => {
+  $effect(async () => {
     if (open) {
-      loadTemplates();
+      await tick();
+      dialogRef?.focus();
+      await loadTemplates();
     }
   });
+
+  async function getStorage() {
+    if (!storageInstance) {
+      const module = await import('../utils/storage.js');
+      storageInstance = module.storage;
+    }
+    return storageInstance;
+  }
 
   async function loadTemplates() {
     isLoading = true;
     try {
+      const storage = await getStorage();
       templates = await storage.getAllTemplates();
     } catch (error) {
       console.error('Failed to load templates:', error);
@@ -59,6 +73,7 @@
     showConfirmDelete = false;
     
     try {
+      const storage = await getStorage();
       await storage.deleteTemplate(pendingDeleteId);
       Toast.success('模板删除成功');
       await loadTemplates();
@@ -86,18 +101,46 @@
       minute: '2-digit',
     });
   }
+
+  function handleOverlayClick(event: MouseEvent) {
+    if (event.target === event.currentTarget) {
+      onClose();
+    }
+  }
+
+  function handleOverlayKeydown(event: KeyboardEvent) {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      onClose();
+    }
+  }
+
+  function handleDialogKeydown(event: KeyboardEvent) {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      onClose();
+    }
+  }
 </script>
 
 {#if open}
   <div
     class="overlay"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="dialog-title"
-    onclick={onClose}
-    onkeydown={(e) => e.key === 'Escape' && onClose()}
+    role="button"
+    aria-label="关闭加载模板对话框"
+    tabindex="0"
+    onclick={handleOverlayClick}
+    onkeydown={handleOverlayKeydown}
   >
-    <div class="dialog" onclick={(e) => e.stopPropagation()}>
+    <div
+      class="dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="dialog-title"
+      tabindex="-1"
+      bind:this={dialogRef}
+      onkeydown={handleDialogKeydown}
+    >
       <div class="header">
         <h2 id="dialog-title">加载模板</h2>
         <button class="close-btn" onclick={onClose} aria-label="关闭">×</button>
