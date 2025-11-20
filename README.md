@@ -1,72 +1,172 @@
 # Anki Template Designer
 
-一个用于设计和预览 Anki 卡片模板的在线工具。
+<div align="center">
 
-## 功能特性
+A powerful online tool for designing and previewing Anki card templates, running entirely in the browser with no installation required.
 
-- 📝 可视化编辑 Anki 卡片模板（Front、Back、CSS）
-- 👀 实时预览卡片效果
-- 🌙 支持夜间模式预览
-- 📱 支持移动端预览
-- 💾 本地保存模板到 IndexedDB
-- 🔄 自动保存功能
-- 🎨 完整的 Anki CSS 变量系统支持
-- 🔧 兼容 Anki 的渲染规则
+[English](#english) | [中文](README.zh-CN.md)
 
-## 开发
+</div>
+
+---
+
+## English
+
+### 📖 Introduction
+
+Anki Template Designer is a powerful online tool that helps Anki users easily design and preview card templates. It runs entirely in the browser, supporting real-time preview, template management, auto-save, and more, making template design simple and efficient.
+
+### ✨ Features
+
+- **📝 Visual Editing**
+  - Edit Front, Back templates and CSS styles separately
+  - Support multiple note types (Basic, Cloze, etc.)
+  - Real-time syntax highlighting and code editing
+
+- **👀 Real-time Preview**
+  - Instant preview of card effects, WYSIWYG
+  - Support Front/Back toggle preview
+  - Fully simulates Anki's rendering environment
+
+- **🌙 Theme Support**
+  - Support day/night mode preview
+  - Complete Anki CSS variable system support
+  - Compatible with Anki's rendering rules and styles
+
+- **📱 Responsive Preview**
+  - Mobile preview mode
+  - Desktop preview mode
+  - Accurately reproduces Anki's display on different devices
+
+- **💾 Template Management**
+  - Save templates locally to IndexedDB
+  - Support creating, loading, and deleting multiple templates
+  - Auto-save functionality to prevent data loss
+
+- **🎨 Anki Compatibility**
+  - Fully follows Anki's HTML/CSS rendering rules
+  - Supports all Anki CSS variables
+  - Compatible with night mode class names (night-mode, night_mode, nightMode)
+  - Correctly handles Cloze deletion cards (Front shows placeholder, Back shows answer)
+
+- **📤 Export Functionality**
+  - One-click export of template code
+  - Easy to copy and use in Anki
+
+### 🚀 Quick Start
 
 ```bash
-# 安装依赖
+# Clone repository
+git clone https://github.com/YOUR_USERNAME/anki-template-designer.git
+cd anki-template-designer
+
+# Install dependencies
 npm install
 
-# 启动开发服务器
+# Start development server
 npm run dev
 
-# 构建生产版本
+# Build for production
 npm run build
 
-# 预览生产构建
+# Preview production build
 npm run preview
 ```
 
-## 部署到 GitHub Pages
+### 📖 User Guide
 
-本项目已配置 GitHub Actions 自动部署到 GitHub Pages。
+1. **Create Template**
+   - Click "New" button to create a new template
+   - Enter template name
+   - Select note type (Basic or Cloze)
 
-### 设置步骤
+2. **Edit Template**
+   - Edit Front, Back templates and CSS in the left editor
+   - Preview effects in real-time on the right
+   - Changes are auto-saved (if template is associated)
 
-1. **创建 GitHub 仓库**
-   ```bash
-   git remote add origin https://github.com/YOUR_USERNAME/anki-template-designer.git
-   git push -u origin main
-   ```
+3. **Manage Fields**
+   - Add/remove fields in the left field manager
+   - Edit sample data for preview
 
-2. **启用 GitHub Pages**
-   - 进入仓库 Settings → Pages
-   - Source 选择 "GitHub Actions"
-   - 保存设置
+4. **Save and Load**
+   - Click "Save" button to save template
+   - Click "Load" button to load saved templates
+   - Template data is stored locally in browser (IndexedDB)
 
-3. **更新 base 路径（如果需要）**
-   - 如果仓库名不是 `anki-template-designer`，需要修改 `vite.config.js` 中的 `base` 路径
-   - 例如：如果仓库名是 `my-anki-designer`，则改为 `base: '/my-anki-designer/'`
+5. **Use in Anki**
+   - Manually copy the Front, Back templates and CSS from the editor
+   - Paste them into Anki's card template editor
+   - Or use the "Export" button to export all template code at once
 
-4. **推送代码**
-   - 每次推送到 `main` 分支时，GitHub Actions 会自动构建并部署
+### 🛠️ Tech Stack
 
-### 自定义域名（可选）
+- **[Svelte 5](https://svelte.dev/)** - Modern UI framework using Runes mode
+- **[Vite](https://vitejs.dev/)** - Fast build tool and dev server
+- **[TypeScript](https://www.typescriptlang.org/)** - Type-safe JavaScript
+- **[IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API)** - Browser local database storage
+- **[Tailwind CSS](https://tailwindcss.com/)** - Utility-first CSS framework
+- **[unplugin-icons](https://github.com/antfu/unplugin-icons)** - Icon system
 
-如果使用自定义域名：
-1. 在仓库 Settings → Pages 中设置 Custom domain
-2. 修改 `vite.config.js` 中的 `base` 为 `'/'`
-3. 重新部署
+### 📦 Project Structure
 
-## 技术栈
+```
+anki-template-designer/
+├── src/
+│   ├── lib/
+│   │   ├── components/      # Svelte components
+│   │   │   ├── Header.svelte
+│   │   │   ├── EditorPane.svelte
+│   │   │   ├── PreviewPane.svelte
+│   │   │   ├── FieldManager.svelte
+│   │   │   └── ...
+│   │   ├── stores/          # State management
+│   │   │   ├── appState.svelte.ts
+│   │   │   └── toast.svelte.ts
+│   │   ├── utils/           # Utilities
+│   │   │   └── storage.ts   # IndexedDB storage
+│   │   └── anki-styles.ts   # Anki CSS generator
+│   └── main.ts
+├── rules/                   # Project rules
+│   └── anki-rendering.mdc   # Anki rendering rules
+└── vite.config.js
+```
 
-- [Svelte 5](https://svelte.dev/) - UI 框架
-- [Vite](https://vitejs.dev/) - 构建工具
-- [TypeScript](https://www.typescriptlang.org/) - 类型安全
-- [IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API) - 本地存储
+### 📝 Development
 
-## 许可证
+#### Requirements
 
-MIT
+- Node.js >= 20
+- npm >= 9
+
+#### Development Commands
+
+```bash
+# Development mode (hot reload)
+npm run dev
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+
+# Sync Anki reference code (optional)
+npm run sync-anki
+```
+
+#### Code Standards
+
+- Use TypeScript for type checking
+- Follow Svelte 5 Runes mode best practices
+- Components use Composition API style
+
+### 🤝 Contributing
+
+Issues and Pull Requests are welcome!
+
+### 📄 License
+
+This project is licensed under the GNU Affero General Public License v3.0 or later. See the [LICENSE](LICENSE) file for details.
+
+For more information, visit [GNU AGPL v3](https://www.gnu.org/licenses/agpl-3.0.html).
