@@ -55,6 +55,10 @@ const translations: Record<Locale, TranslationNode> = {
       title: "Anki Template Designer",
       templateIndicator: "Unsaved",
     },
+    noteTypes: {
+      basic: "Basic",
+      cloze: "Cloze",
+    },
     fieldManager: {
       noteType: "Note Type",
       addNoteType: "Add note type",
@@ -62,6 +66,14 @@ const translations: Record<Locale, TranslationNode> = {
       fields: "Fields",
       add: "Add",
       removeField: "Remove field",
+    },
+    defaults: {
+      sampleData: {
+        basicFront: "What is the capital of France?",
+        basicBack: "Paris",
+        clozeText: "The capital of France is {{c1::Paris}}.",
+        clozeExtra: "It is a beautiful city.",
+      },
     },
     editorPane: {
       front: "Front Template",
@@ -179,6 +191,10 @@ const translations: Record<Locale, TranslationNode> = {
       title: "Anki 模板设计器",
       templateIndicator: "未保存",
     },
+    noteTypes: {
+      basic: "问答题",
+      cloze: "填空题",
+    },
     fieldManager: {
       noteType: "笔记类型",
       addNoteType: "添加笔记类型",
@@ -186,6 +202,14 @@ const translations: Record<Locale, TranslationNode> = {
       fields: "字段",
       add: "添加",
       removeField: "删除字段",
+    },
+    defaults: {
+      sampleData: {
+        basicFront: "法国的首都是哪里？",
+        basicBack: "巴黎",
+        clozeText: "法国的首都是 {{c1::巴黎}}。",
+        clozeExtra: "它是一座美丽的城市。",
+      },
     },
     editorPane: {
       front: "正面模板",

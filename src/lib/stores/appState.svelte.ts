@@ -1,4 +1,6 @@
 import type { AppState, NoteType, Templates } from '../types';
+import type { Locale } from '../i18n';
+import { getLocale, translate } from '../i18n';
 
 const BASIC_TEMPLATES: Templates = {
   front: '{{Front}}',
@@ -11,6 +13,15 @@ const CLOZE_TEMPLATES: Templates = {
   back: '{{cloze:Text}}\n\n<br>\n\n{{Extra}}',
   css: '.card {\n font-family: arial;\n font-size: 20px;\n text-align: center;\n color: black;\n background-color: white;\n}\n\n.cloze {\n font-weight: bold;\n color: blue;\n}\n\n.night-mode .card {\n color: #e0e0e0;\n background-color: #2c2c2c;\n}\n\n.night-mode .cloze {\n color: lightblue;\n}\n'
 };
+
+function createDefaultSampleData(locale: Locale = getLocale()) {
+  return {
+    Front: translate(locale, 'defaults.sampleData.basicFront'),
+    Back: translate(locale, 'defaults.sampleData.basicBack'),
+    Text: translate(locale, 'defaults.sampleData.clozeText'),
+    Extra: translate(locale, 'defaults.sampleData.clozeExtra'),
+  };
+}
 
 export const appState = $state<AppState & { 
   noteTypes: NoteType[]; 
@@ -55,12 +66,7 @@ export const appState = $state<AppState & {
   },
 
   // Sample Data for Preview
-  sampleData: {
-    Front: 'What is the capital of France?',
-    Back: 'Paris',
-    Text: 'The capital of France is {{c1::Paris}}.',
-    Extra: 'It is a beautiful city.'
-  },
+  sampleData: createDefaultSampleData(),
 
   // UI State
   ui: {

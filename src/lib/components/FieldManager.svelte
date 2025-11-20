@@ -47,6 +47,12 @@
 
   const t = (key: string, values?: Record<string, string>) =>
     translate(currentLocale, key, values);
+
+  function getNoteTypeLabel(name: string): string {
+    if (name === "Basic") return t("noteTypes.basic");
+    if (name === "Cloze") return t("noteTypes.cloze");
+    return name;
+  }
 </script>
 
 <div class="field-manager">
@@ -58,7 +64,7 @@
         onchange={(e) => switchNoteType(e.currentTarget.value)}
       >
         {#each appState.noteTypes as nt}
-          <option value={nt.name}>{nt.name}</option>
+          <option value={nt.name}>{getNoteTypeLabel(nt.name)}</option>
         {/each}
       </select>
       <button
