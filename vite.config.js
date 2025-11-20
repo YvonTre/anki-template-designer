@@ -13,7 +13,7 @@ export default defineConfig({
     }),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favico.svg'],
+      includeAssets: ['favicon.svg'],
       manifest: {
         name: 'Anki Template Designer',
         short_name: 'Anki Designer',
@@ -25,12 +25,12 @@ export default defineConfig({
         background_color: '#121212',
         icons: [
           {
-            src: '/favico.svg',
+            src: 'favicon.svg',
             sizes: '192x192',
             type: 'image/svg+xml',
           },
           {
-            src: '/favico.svg',
+            src: 'favicon.svg',
             sizes: '512x512',
             type: 'image/svg+xml',
             purpose: 'any maskable',
