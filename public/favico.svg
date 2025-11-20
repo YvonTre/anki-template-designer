@@ -1,0 +1,31 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- 背景：深色圆角方块，便于当作 PWA icon -->
+  <rect x="32" y="32" width="448" height="448" rx="96" fill="#111827" />
+
+  <!-- 内部发光感的淡色层，增加一点“书页”的柔和感 -->
+  <rect x="64" y="64" width="384" height="384" rx="80" fill="#1f2937" />
+
+  <!-- 中央卡片（代表 Anki 卡片 / 书摘） -->
+  <rect x="128" y="128" width="256" height="256" rx="32" fill="#f9fafb" />
+
+  <!-- 卡片顶部色条（设计 / 模板标签） -->
+  <rect x="128" y="128" width="256" height="64" rx="32" fill="#38bdf8" />
+
+  <!-- 卡片上的“文字线条” -->
+  <rect x="152" y="212" width="208" height="12" rx="6" fill="#d1d5db" />
+  <rect x="152" y="244" width="168" height="12" rx="6" fill="#e5e7eb" />
+  <rect x="152" y="276" width="192" height="12" rx="6" fill="#e5e7eb" />
+  <rect x="152" y="308" width="140" height="12" rx="6" fill="#e5e7eb" />
+
+  <!-- 右下角的小“高亮角标”，代表 design / 模板 -->
+  <rect x="280" y="320" width="72" height="48" rx="16" fill="#f97316" />
+
+  <!-- 角标上的简化“D”形状（代表 Design），避免具体文字 -->
+  <path d="M296 332h16c10 0 18 8 18 18s-8 18-18 18h-16v-36z" fill="#fef3c7"/>
+
+  <!-- 小星星/高光：代表“灵感闪光” -->
+  <g transform="translate(352 120)">
+    <circle cx="0" cy="0" r="10" fill="#fbbf24" />
+    <path d="M0 -16 L3 -5 L16 0 L3 5 L0 16 L-3 5 L-16 0 L-3 -5 Z" fill="#facc15" />
+  </g>
+</svg>
