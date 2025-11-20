@@ -79,6 +79,8 @@
     appState.ui.isNight = !appState.ui.isNight;
   }
 
+  import { generateAnkiCss } from "../anki-styles";
+
   let iframe: HTMLIFrameElement;
 
   $effect(() => {
@@ -86,47 +88,40 @@
 
     const doc = iframe.contentDocument;
     const htmlContent = activeTab === "front" ? frontHtml : backHtml;
-    const nightClass = isNight ? "night" : "";
 
-    // Initialize structure if empty
-    if (!doc.getElementById("anki-styles")) {
-      doc.head.innerHTML = `<style id="anki-styles"></style>`;
-    }
+    // Detect platform (we can use navigator to detect Mac)
+    const isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
 
-    // Update Styles
-    const styleEl = doc.getElementById("anki-styles");
-    if (styleEl) {
-      styleEl.textContent = `
-        ${css}
-        body {
-          margin: 0;
-          padding: 0;
-          background-color: ${isNight ? "#2d2d2d" : "white"};
-          color: ${isNight ? "white" : "black"};
-          font-family: system-ui, -apple-system, sans-serif;
-          overflow-wrap: break-word;
-        }
-        .cloze { font-weight: bold; color: blue; }
-        .night .cloze { color: lightblue; }
-        
-        /* Scrollbar styling to match Anki/modern feel */
-        ::-webkit-scrollbar { width: 10px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #888; border-radius: 5px; }
-        ::-webkit-scrollbar-thumb:hover { background: #555; }
-      `;
-    }
+    // Generate Standard CSS from Anki variables
+    const standardCss = generateAnkiCss(isMac);
 
-    // Update Body Class
-    // Anki puts 'card' and 'night' classes on the body
-    doc.body.className = `card ${nightClass}`;
+    // Determine body class (matching Anki's body_class)
+    const bodyClasses = ["card"];
+    if (isNight) bodyClasses.push("night-mode");
+    if (isMobile) bodyClasses.push("mobile");
+    if (isMac) bodyClasses.push("isMac");
 
-    // Update Content
-    // Only update if changed to prevent losing scroll position or focus if possible
-    // But here we are rendering a template, so usually it changes fully.
-    if (doc.body.innerHTML !== htmlContent) {
-      doc.body.innerHTML = htmlContent;
-    }
+    // Construct the full HTML document
+    // Matching Anki's stdHtml structure with dir and data-bs-theme attributes
+    const html = `
+      <!DOCTYPE html>
+      <html class="${isNight ? "night-mode" : ""}" dir="ltr" data-bs-theme="${isNight ? "dark" : "light"}">
+      <head>
+        <meta charset="utf-8">
+        <title>Anki Preview</title>
+        <style>${standardCss}</style>
+        <style>${css}</style>
+      </head>
+      <body class="${bodyClasses.join(" ")}">
+        ${htmlContent}
+      </body>
+      </html>
+    `;
+
+    // Write to iframe
+    doc.open();
+    doc.write(html);
+    doc.close();
   });
 </script>
 
