@@ -1,18 +1,101 @@
 <script lang="ts">
+  import LoadDialog from './LoadDialog.svelte';
+  import NewTemplateDialog from './NewTemplateDialog.svelte';
+  import { appState, saveCurrentTemplate, clearCurrentTemplate, saveState, autoSaveState, getHasUnsavedChanges } from '../stores/appState.svelte.js';
+  import IconSpinner from '~icons/svg-spinners/ring-resize';
+  import IconCheck from '~icons/mdi/check';
+  import IconError from '~icons/mdi/alert-circle';
+
   interface Props {
     onExport: () => void;
   }
   let { onExport }: Props = $props();
+
+  let showLoadDialog = $state(false);
+  let showNewDialog = $state(false);
+
+  async function handleSave() {
+    if (!appState.currentTemplateId) {
+      // If no template is associated, show new template dialog
+      showNewDialog = true;
+      return;
+    }
+
+    try {
+      await saveCurrentTemplate();
+    } catch (error) {
+      console.error('Failed to save:', error);
+    }
+  }
+
+  function handleNew() {
+    // Clear current template to start fresh
+    clearCurrentTemplate();
+    showNewDialog = true;
+  }
+
+  let saveStatus = $derived(saveState.status);
+  let autoSaveStatus = $derived(autoSaveState.status);
+  let isSaving = $derived(saveState.isSaving);
+  let isAutoSaving = $derived(autoSaveState.isSaving);
+  let hasUnsavedChanges = $derived(getHasUnsavedChanges());
 </script>
 
 <header>
   <div class="logo">
     <h1>Anki Template Designer</h1>
+    {#if appState.currentTemplateId && appState.currentTemplateName}
+      <span class="template-indicator">{appState.currentTemplateName}</span>
+      {#if hasUnsavedChanges}
+        <span class="template-indicator unsaved">未保存</span>
+      {/if}
+    {:else}
+      <span class="template-indicator unsaved">未保存</span>
+    {/if}
+    {#if appState.currentTemplateId && (saveStatus !== 'idle' || autoSaveStatus !== 'idle')}
+      <div class="save-status">
+        {#if isSaving}
+          <IconSpinner class="spinner" />
+          <span>保存中...</span>
+        {:else if isAutoSaving}
+          <IconSpinner class="spinner" />
+          <span>自动保存中...</span>
+        {:else if saveStatus === 'saved'}
+          <IconCheck class="check-icon" />
+          <span>保存成功</span>
+        {:else if autoSaveStatus === 'saved'}
+          <IconCheck class="check-icon" />
+          <span>已自动保存</span>
+        {:else if saveStatus === 'error' || autoSaveStatus === 'error'}
+          <IconError class="error-icon" />
+          <span>保存失败</span>
+        {/if}
+      </div>
+    {/if}
   </div>
   <div class="controls">
+    <button onclick={handleNew}>➕ 新建</button>
+    <button onclick={handleSave} disabled={isSaving}>
+      {#if isSaving}
+        <IconSpinner class="spinner" />
+      {/if}
+      <span>💾 保存</span>
+    </button>
+    <button onclick={() => (showLoadDialog = true)}>📂 加载</button>
     <button class="primary" onclick={onExport}> Export </button>
   </div>
 </header>
+
+<LoadDialog
+  open={showLoadDialog}
+  onClose={() => (showLoadDialog = false)}
+/>
+
+<NewTemplateDialog
+  open={showNewDialog}
+  onClose={() => (showNewDialog = false)}
+  initialName=""
+/>
 
 <style>
   header {
@@ -26,15 +109,73 @@
     border-bottom: 1px solid #333;
   }
 
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
   h1 {
     font-size: 1.2rem;
     margin: 0;
     font-weight: 500;
   }
 
+  .template-indicator {
+    font-size: 0.75rem;
+    color: #4caf50;
+    padding: 0.2rem 0.5rem;
+    background: rgba(76, 175, 80, 0.2);
+    border-radius: 4px;
+  }
+
+  .template-indicator.unsaved {
+    color: #ff9800;
+    background: rgba(255, 152, 0, 0.2);
+  }
+
+  .save-status {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.75rem;
+    color: #ccc;
+    padding: 0.2rem 0.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+  }
+
+  .save-status .spinner {
+    width: 12px;
+    height: 12px;
+    animation: spin 1s linear infinite;
+  }
+
+  .save-status .check-icon {
+    width: 14px;
+    height: 14px;
+    color: #4caf50;
+  }
+
+  .save-status .error-icon {
+    width: 14px;
+    height: 14px;
+    color: #f44336;
+  }
+
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
   .controls {
     display: flex;
     gap: 0.5rem;
+    align-items: center;
   }
 
   button {
@@ -46,10 +187,24 @@
     cursor: pointer;
     font-size: 0.9rem;
     transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
   }
 
-  button:hover {
+  button:hover:not(:disabled) {
     background: #444;
+  }
+
+  button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  button .spinner {
+    width: 14px;
+    height: 14px;
+    animation: spin 1s linear infinite;
   }
 
   button.primary {
