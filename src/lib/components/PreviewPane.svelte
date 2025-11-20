@@ -21,7 +21,7 @@
       // Format: {{c1::Answer::Hint}} or {{c1::Answer}}
       let content = rawContent.replace(
         /{{c\d+::(.*?)(::(.*?))?}}/g,
-        (match, answer, _, hint) => {
+        (_, answer, __, hint) => {
           if (isFront) {
             // Front: Show placeholder [...] or [Hint] if hint exists
             const placeholder = hint ? `[${hint}]` : '[...]';
@@ -98,9 +98,7 @@
   const t = (key: string) => translate(currentLocale, key);
 
   $effect(() => {
-    if (!iframe?.contentDocument) return;
-
-    const doc = iframe.contentDocument;
+    if (!iframe) return;
     const htmlContent = activeTab === "front" ? frontHtml : backHtml;
 
     // Detect platform (we can use navigator to detect Mac)
@@ -138,10 +136,10 @@
       </html>
     `;
 
-    // Write to iframe
-    doc.open();
-    doc.write(html);
-    doc.close();
+    // Update iframe using srcdoc to avoid document.write and sandbox warnings
+    if (iframe.srcdoc !== html) {
+      iframe.srcdoc = html;
+    }
   });
 </script>
 
@@ -180,7 +178,7 @@
       <iframe
         bind:this={iframe}
         title={t("previewPane.iframeTitle")}
-        sandbox="allow-same-origin allow-scripts"
+        sandbox="allow-scripts"
       ></iframe>
     </div>
   </div>
