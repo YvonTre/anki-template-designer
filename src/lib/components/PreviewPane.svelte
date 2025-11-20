@@ -2,7 +2,7 @@
   import { appState } from "../stores/appState.svelte.js";
 
   // Simple template renderer
-  function renderTemplate(template: string, fields: Record<string, string>) {
+  function renderTemplate(template: string, fields: Record<string, string>, isFront: boolean = false) {
     let rendered = template;
 
     // Helper to check if text contains HTML tags
@@ -15,17 +15,23 @@
       const rawContent = fields[fieldName] || "";
       const isHtml = hasHtml(rawContent);
 
-      // 1. Apply Cloze Replacement
-      // Replace {{c1::Answer::Hint}} with <span class="cloze">[...]</span> or Answer
-      // For now, let's just render it as the answer in bold/blue (simulating active cloze or just revealed)
-      // Anki has complex logic for c1, c2 etc.
-      // Let's just replace {{c\d+::(.*?)(::.*?)?}} with <span class="cloze">$1</span>
+      // Apply Cloze Replacement based on front/back
+      // Format: {{c1::Answer::Hint}} or {{c1::Answer}}
       let content = rawContent.replace(
-        /{{c\d+::(.*?)(::.*?)?}}/g,
-        '<span class="cloze">$1</span>',
+        /{{c\d+::(.*?)(::(.*?))?}}/g,
+        (match, answer, _, hint) => {
+          if (isFront) {
+            // Front: Show placeholder [...] or [Hint] if hint exists
+            const placeholder = hint ? `[${hint}]` : '[...]';
+            return `<span class="cloze">${placeholder}</span>`;
+          } else {
+            // Back: Show the answer with cloze styling
+            return `<span class="cloze">${answer}</span>`;
+          }
+        }
       );
 
-      // 2. Handle Newlines (if original content was plain text)
+      // Handle Newlines (if original content was plain text)
       if (!isHtml) {
         content = content.replace(/\n/g, "<br>");
       }
@@ -57,14 +63,14 @@
   let activeTab = $state<"front" | "back">("front");
 
   let frontHtml = $derived.by(() => {
-    return renderTemplate(appState.templates.front, appState.sampleData);
+    return renderTemplate(appState.templates.front, appState.sampleData, true);
   });
 
   let backHtml = $derived.by(() => {
     let html = appState.templates.back;
-    // Replace {{FrontSide}} with the rendered front
+    // Replace {{FrontSide}} with the rendered front (front should show placeholders)
     html = html.replace(/{{FrontSide}}/g, frontHtml);
-    return renderTemplate(html, appState.sampleData);
+    return renderTemplate(html, appState.sampleData, false);
   });
 
   let css = $derived(appState.templates.css);
