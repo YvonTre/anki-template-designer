@@ -29,6 +29,10 @@ globs: ["src/lib/components/PreviewPane.svelte", "src/lib/anki-styles.ts"]
 - `<html dir>`: 固定为 `"ltr"` (除非支持 RTL)
 - `<html data-bs-theme>`: 夜间为 `"dark"`，日间为 `"light"`
 - `<body class>`: 必须包含 `"card"`，根据状态追加其他类
+  - 夜间模式时，body 上会同时添加三个类以保持兼容性：
+    - `night-mode` (新格式)
+    - `night_mode` (下划线格式，legacy)
+    - `nightMode` (驼峰格式，legacy)
 
 ## CSS 变量系统
 
@@ -160,7 +164,8 @@ textarea:focus, input:focus {
 
 1. 使用 iframe 隔离样式
 2. 动态检测平台 (`isMac`)
-3. 正确生成 body class: `['card', 'night-mode', 'mobile', 'isMac'].join(' ')`
+3. 正确生成 body class: `['card', 'night-mode', 'night_mode', 'nightMode', 'mobile', 'isMac'].join(' ')`
+   - 夜间模式时需同时添加三个兼容性类名（night-mode、night_mode、nightMode）
 4. 使用 `doc.open()` / `doc.write()` / `doc.close()` 写入 HTML
 5. 传递 `isMac` 参数给 `generateAnkiCss(isMac)`
 
@@ -172,6 +177,10 @@ textarea:focus, input:focus {
 4. 使用 `content-box` sizing
 5. Body margin 固定为 `2em`
 6. 滚动条 `border-radius: 3px`
+7. 支持夜间模式的兼容性类名选择器：
+   - `.night-mode`、`.night_mode`、`.nightMode`（后代选择器）
+   - `body.night_mode`、`body.nightMode`（legacy 选择器）
+   - 确保所有夜间模式样式都支持这三种类名格式
 
 ## 常见错误
 
@@ -180,6 +189,7 @@ textarea:focus, input:focus {
 box-sizing: border-box;  /* 会破坏卡片布局 */
 body { margin: 0; }      /* 不符合 Anki 规范 */
 font-size: 16px;         /* 应该是 15px */
+.night-mode .cloze { }   /* 缺少兼容性类名 */
 ```
 
 ✅ **正确**:
@@ -187,6 +197,9 @@ font-size: 16px;         /* 应该是 15px */
 box-sizing: content-box;
 body { margin: 2em; }
 font-size: 15px;
+.night-mode .cloze,
+.night_mode .cloze,
+.nightMode .cloze { }  /* 支持所有兼容性类名 */
 ```
 
 ## 调试检查
@@ -203,8 +216,8 @@ console.log(doc.documentElement.className);  // "night-mode" 或 ""
 console.log(doc.documentElement.dir);        // "ltr"
 console.log(doc.documentElement.dataset.bsTheme);  // "dark" 或 "light"
 
-// 检查 body 类
-console.log(doc.body.className);  // "card night-mode mobile isMac"
+// 检查 body 类（夜间模式时应包含三个兼容性类名）
+console.log(doc.body.className);  // "card night-mode night_mode nightMode mobile isMac"
 
 // 检查 CSS 变量
 console.log(getComputedStyle(doc.documentElement).getPropertyValue('--canvas'));

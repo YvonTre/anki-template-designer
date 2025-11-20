@@ -96,8 +96,13 @@
     const standardCss = generateAnkiCss(isMac);
 
     // Determine body class (matching Anki's body_class)
+    // For compatibility: Anki uses night-mode, night_mode, and nightMode (legacy)
     const bodyClasses = ["card"];
-    if (isNight) bodyClasses.push("night-mode");
+    if (isNight) {
+      bodyClasses.push("night-mode");
+      bodyClasses.push("night_mode"); // Legacy compatibility
+      bodyClasses.push("nightMode"); // Legacy compatibility
+    }
     if (isMobile) bodyClasses.push("mobile");
     if (isMac) bodyClasses.push("isMac");
 

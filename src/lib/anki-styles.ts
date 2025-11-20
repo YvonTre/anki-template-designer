@@ -307,9 +307,19 @@ export function generateAnkiCss(isMac: boolean = false): string {
       box-shadow: 0px 1px 3px var(--border-subtle);
       font-family: Helvetica;
     }
-    .night-mode button { 
+    /* Night mode button - support all compatibility class names */
+    .night-mode button,
+    .night_mode button,
+    .nightMode button { 
       --canvas: #606060; 
       --fg: #eee; 
+    }
+    
+    /* Legacy compatibility: support old night mode selectors */
+    body.night_mode button,
+    body.nightMode button {
+      --canvas: #606060;
+      --fg: #eee;
     }
   ` : `
     button {
@@ -405,7 +415,16 @@ export function generateAnkiCss(isMac: boolean = false): string {
       color: blue;
     }
     
-    .night-mode .cloze {
+    /* Night mode cloze - support all compatibility class names */
+    .night-mode .cloze,
+    .night_mode .cloze,
+    .nightMode .cloze {
+      color: lightblue;
+    }
+    
+    /* Legacy compatibility: support old night mode selectors */
+    body.night_mode .cloze,
+    body.nightMode .cloze {
       color: lightblue;
     }
   `;
